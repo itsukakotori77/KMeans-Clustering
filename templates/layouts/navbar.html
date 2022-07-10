@@ -1,0 +1,59 @@
+<div class="horizontal-menu">
+    <nav class="navbar top-navbar col-lg-12 col-12 p-0">
+        <div class="container-fluid">
+        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-between">
+            <ul class="navbar-nav navbar-nav-left">
+                <li class="nav-item ms-0 me-5 d-lg-flex d-none">
+                    <a href="#" class="nav-link horizontal-nav-left-menu"><i class="mdi mdi-format-list-bulleted"></i></a>
+                </li>
+            </ul>
+            <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo" href="{{ url_for('static', filename='index.html') }}"><img src="{{ url_for('static', filename='assets/images/logo.png') }}" alt="logo"/></a>
+                <a class="navbar-brand brand-logo-mini" href="{{ url_for('static', filename='index.html') }}"><img src="{{ url_for('static', filename='assets/images/logo-mini.svg') }}" alt="logo"/></a>
+            </div>
+            <ul class="navbar-nav navbar-nav-right">
+                <li class="nav-item nav-profile dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+                        <span class="nav-profile-name">User</span>
+                        <span class="online-status"></span>
+                        <img src="{{ url_for('static', filename='assets/images/faces/users.png') }}" alt="profile"/>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        </div>
+    </nav>
+    <nav class="bottom-navbar">
+        <div class="container">
+            <ul class="nav page-navigation">
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="../../index.html">
+                <i class="mdi mdi-file-document-box menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+                </a>
+            </li> -->
+            <li class="nav-item {% if request.path == '/dataset' %} active {% endif %}">
+                <a href="{{ url_for('datasetIndex') }}" class="nav-link">
+                    <i class="mdi mdi-cube-outline menu-icon"></i>
+                    <span class="menu-title">Dataset</span>
+                    <i class="menu-arrow"></i>
+                </a>
+            </li>
+            <li class="nav-item {% if request.path == '/perhitungan' or request.path == '/perhitungan/k' %} active {% endif %}">
+                <a href="{{ url_for('perhitungan') }}" class="nav-link">
+                    <i class="mdi mdi-chart-areaspline menu-icon"></i>
+                    <span class="menu-title">Perhitungan</span>
+                    <i class="menu-arrow"></i>
+                </a>
+            </li>
+            <li class="nav-item {% if request.path == '/clustering' %} active {% endif %}">
+                <a href="{{ url_for('clusteringBaru') }}" class="nav-link">
+                    <i class="mdi mdi-finance menu-icon"></i>
+                    <span class="menu-title">Data Hasil</span>
+                    <i class="menu-arrow"></i>
+                </a>
+            </li>
+            </ul>
+        </div>
+    </nav>
+</div>

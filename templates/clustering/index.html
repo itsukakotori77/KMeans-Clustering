@@ -1,0 +1,181 @@
+{% extends 'layouts/app.html' %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row" id="table-print">
+                <div class="col-sm-8">
+                    <div class="card" style="height: 880px;">
+                        <div class="card-body">
+                            <p class="card-title">{{ title }}</p>
+                            <strong>Note !!</strong>
+                            <ol>
+                                <li>Cluster 1 <strong>(Menandakan Supermarket)</strong></li>
+                                <li>Cluster 2 <strong>(Menandakan Mall)</strong></li>
+                                <li>Cluster 3 <strong>(Menandakan Departement Store)</strong></li>
+                                <li>Cluster 4 <strong>(Menandakan Hypermarket)</strong></li>
+                            </ol>
+                            <table class="table table-hover datatables">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Nama</th>
+                                        <th>Jenis Kelamin</th>
+                                        <th>Usia</th>
+                                        <th>Pendapatan Bulanan</th>
+                                        <th>Jumlah Pengeluaran Bulanan</th>
+                                        <th>Pusat Belanja yang dikunjungi</th>
+                                        <th>Jenis Perbenlanjaan terdekat</th>
+                                        <th>Cluster</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in table %}
+                                        <tr>
+                                            <td>{{ row[0] }}</td>
+                                            <td>{{ row[1] }}</td>
+                                            <td>{{ row[2] }}</td>
+                                            <td>{{ row[3] }}</td>
+                                            <td>{{ row[4] }}</td>
+                                            <td>{{ row[5] }}</td>
+                                            <td>{{ row[6] }}</td>
+                                            <td>{{ row[7] }}</td>
+                                            <td>{{ row[8] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <canvas id="polarAreaChart" style="max-height: 400px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-sm-12">
+                            <div class="card" style="height: 400px;">
+                                <div class="card-body">
+                                    <!-- <canvas id="myChart"></canvas> -->
+                                    <div id="bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        $(function(){
+            $('table').removeClass('dataframe')
+        })
+
+        $("#form-import").validate({
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                // Add Class
+                $('.form-group').addClass('has-danger');
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            new Chart(document.querySelector('#polarAreaChart'), {
+            type: 'polarArea',
+            data: {
+                labels: [
+                    'Cluster 1',
+                    'Cluster 2',
+                    'Cluster 3',
+                    'Cluster 4',
+                ],
+                datasets: [{
+                    label: 'Cluster',
+                    data: [
+                        parseInt('{{ cluster[0] }}'), 
+                        parseInt('{{ cluster[1] }}'), 
+                        parseInt('{{ cluster[2] }}'),
+                        parseInt('{{ cluster[3] }}'),
+                    ],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#ffc107',
+                        '#198754',
+                        '#2c808f'
+                    ]
+                }]
+            }
+            });
+        });
+
+        var barOptions = {
+            series: [
+                {
+                    name: "Supermarket",
+                    data: [parseInt("{{ cluster[0] }}")],
+                },
+                {
+                    name: "Mall",
+                    data: [parseInt("{{ cluster[1] }}")],
+                },
+                {
+                    name: "Departement Store",
+                    data: [parseInt("{{ cluster[2] }}")],
+                },
+                {
+                    name: "Hypermarket",
+                    data: [parseInt("{{ cluster[3] }}")],
+                },
+            ],
+            chart: {
+                type: "bar",
+                height: 350,
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: "55%",
+                    endingShape: "rounded",
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ["transparent"],
+            },
+            xaxis: {
+                categories: ["Pusat Perbelanjaan"],
+            },
+            yaxis: {
+                title: {
+                    text: "Jumlah",
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+        };
+
+        var bar = new ApexCharts(document.querySelector("#bar"), barOptions);
+        bar.render();
+
+    </script>
+{% endblock %}

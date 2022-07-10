@@ -1,0 +1,302 @@
+{% extends 'layouts/app.html' %}
+
+{% block css %}
+
+    <style>
+        .scrollbar {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row" id="table-print">
+                <div class="col-sm-8">
+                    <div class="card" style="height: 880px;">
+                        <div class="card-body">
+                            <p class="card-title">{{ title }}</p>
+                            <strong>Note !!</strong>
+                            <ol>
+                                {% for i in cluster %}
+                                    {% for j in range(i | length)  %}
+                                        <li>Cluster {{ j }} </li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ol>
+                            <table class="table table-hover datatables">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Nama</th>
+                                        <th>Jenis Kelamin</th>
+                                        <th>Usia</th>
+                                        <th>Pendapatan Bulanan</th>
+                                        <th>Jumlah Pengeluaran Bulanan</th>
+                                        <th>Jarak (KM)</th>
+                                        <th>Jumlah Kunjungan</th>
+                                        <th>Cluster</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in table %}
+                                        <tr>
+                                            <td>{{ row[0] }}</td>
+                                            <td>{{ row[1] }}</td>
+                                            <td>{{ row[2] }}</td>
+                                            <td>{{ row[3] }}</td>
+                                            <td>{{ row[4] }}</td>
+                                            <td>{{ row[5] }}</td>
+                                            <td>{{ row[6] }}</td>
+                                            <td>{{ row[7] }}</td>
+                                            <td>{{ row[8] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <canvas id="polarAreaChart" style="max-height: 400px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-sm-12">
+                            <div class="card" style="height: 400px;">
+                                <div class="card-body">
+                                    <!-- <canvas id="myChart"></canvas> -->
+                                    <div id="bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 3D Cluster Label 1 ===== -->
+            {% for k in cluster_data %}
+            <div class="row mt-5">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body" style=" max-height: 500px; overflow-y: auto; overflow-x: auto;">
+                            <p class="card-title"><strong>Iterasi Ke-{{ loop.index }}</strong></p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered scrollbar">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="text-center"><strong>Cluster</strong> </th>
+                                            <th colspan="5" class="text-center"><strong>Atribut</strong> </th>
+                                            <th colspan="5" class="text-center"><strong>Centroid</strong> </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in k %}
+                                            <tr>
+                                                <td>{{ i[0] }}</td>
+                                                {% for atribut in i[1] %}
+                                                    <td>{{ atribut }}</td>
+                                                {% endfor %}
+
+                                                {% for centroid in i[2] %}
+                                                    <td>{{ centroid }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- ===== 3D Cluster Label 1 ===== -->
+            <div class="row mt-5">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="myDiv"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="myDiv2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
+
+    {% if message %}
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Silahkan Masukan jumlah K terlebih dahulu!',
+            })
+        </script>
+    {% endif %}
+    
+    <script>
+
+        $("#form-import").validate({
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('invalid-feedback');
+                element.closest('.form-group').append(error);
+            },
+            highlight: function (element, errorClass, validClass) {
+                // Add Class
+                $('.form-group').addClass('has-danger');
+            }
+        });
+
+        var data_chart = []
+        var data_label = []
+        var data_bar = []
+
+        {% for i in cluster %}
+            {% for j in i %}
+                data_chart.push(parseInt("{{ j }}"))
+            {% endfor %}
+        {% endfor %}
+        
+        {% for i in cluster %}
+            {% for j in range(i | length)  %}
+                data_label.push('Cluster {{ j }}')
+            {% endfor %}
+        {% endfor %}
+        
+        {% for i in cluster %}
+            {% for j in range(i | length) %}
+                // data_chart.push(parseInt("{{ j }}"))
+                var data_ = {
+                    name: "Data Cluster  " + parseInt("{{ j }}"),
+                    data: [parseInt("{{ i[j] }}")],
+                }
+
+                data_bar.push(data_)
+            {% endfor %}
+        {% endfor %}
+        
+
+        console.log(data_bar)
+
+        document.addEventListener("DOMContentLoaded", () => {
+            new Chart(document.querySelector('#polarAreaChart'), {
+            type: 'polarArea',
+            data: {
+                labels: data_label,
+                datasets: [{
+                    label: 'Cluster',
+                    data: data_chart,
+                    backgroundColor: [
+                        '#dc3545',
+                        '#ffc107',
+                        '#198754',
+                        '#2c808f'
+                    ]
+                }]
+            }
+            });
+        });
+
+        
+
+        var barOptions = {
+            series: data_bar,
+            chart: {
+                type: "bar",
+                height: 350,
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: "55%",
+                    endingShape: "rounded",
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ["transparent"],
+            },
+            xaxis: {
+                categories: ["Pusat Perbelanjaan"],
+            },
+            yaxis: {
+                title: {
+                    text: "Jumlah",
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+        };
+
+        var bar = new ApexCharts(document.querySelector("#bar"), barOptions);
+        bar.render();
+
+        var layout = {
+            autosize: true,
+            height: 500,
+            scene: {
+                xaxis: {title: 'Jumlah pengeluaran bulanan'},
+                yaxis: {title: 'Pendapatan bulanan'},
+                zaxis: {title: 'Usia'}
+            },
+            title: 'Clustering Pengunjung Berdasarkan Ekonomi',
+            width: 600
+        };
+
+        var layout2 = {
+            autosize: true,
+            height: 500,
+            scene: {
+                xaxis: {
+                    title: 'Jumlah Kunjungan',
+                    range: [1,2,3,4]
+                },
+                yaxis: {
+                    title: 'Jarak',
+                    range: [1,2,3,4]
+                },
+                zaxis: {title: 'Usia'}
+            },
+            title: 'Clustering Pengunjung Berdasarkan Jarak',
+            width: 600
+        };
+
+
+        var graphs = {{plot | safe}};
+
+        var graphs2 = {{ plot2 | safe }}
+
+        Plotly.newPlot('myDiv',graphs,layout);
+        Plotly.newPlot('myDiv2',graphs2,layout2);
+
+    </script>
+{% endblock %}
